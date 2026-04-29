@@ -349,3 +349,15 @@ p {
   text-align: center;
 }
 
+.table-head,
+  .page-heading,
+  .with-action,
+  .with-badge,
+  .notifications-head,
+  .section-head,
+  .notification-item,
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
