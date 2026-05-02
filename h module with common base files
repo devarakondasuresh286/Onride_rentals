@@ -1,0 +1,11 @@
+index.html
+package.json
+src/App.jsx
+src/components/Button.jsx
+src/components/Card.jsx
+src/components/Navbar.jsx
+src/data/vehicles.js
+src/main.jsx
+src/pages/UserDashboardPage.jsx
+src/styles.css
+vite.config.js

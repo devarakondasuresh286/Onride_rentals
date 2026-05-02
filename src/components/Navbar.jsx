@@ -9,10 +9,10 @@ function Navbar() {
       <nav className="nav-links">
         <NavLink to="/">Home</NavLink>
         <NavLink to="/browse">Browse Vehicles</NavLink>
-        <NavLink to="/user-dashboard">User Dashboard</NavLink>
+        <NavLink to="/dashboard">User Dashboard</NavLink>
         <NavLink to="/renter-dashboard">Renter Dashboard</NavLink>
         <NavLink to="/admin">Admin</NavLink>
-        <NavLink to="/login">Login</NavLink>
+        <NavLink to="/login">Log in</NavLink>
         <NavLink to="/signup">Signup</NavLink>
       </nav>
     </header>

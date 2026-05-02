@@ -16,7 +16,8 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/browse" element={<BrowseVehiclesPage />} />
-          <Route path="/user-dashboard" element={<UserDashboardPage />} />
+          <Route path="/dashboard" element={<UserDashboardPage />} />
+          <Route path="/user-dashboard" element={<Navigate to="/dashboard" replace />} />
           <Route path="/renter-dashboard" element={<RenterDashboardPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
