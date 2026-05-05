@@ -11,7 +11,11 @@ function SignupPage() {
         <label htmlFor="signup-email">Email</label>
         <input id="signup-email" type="email" placeholder="you@example.com" />
         <label htmlFor="signup-password">Password</label>
-        <input id="signup-password" type="password" placeholder="Create password" />
+        <input
+          id="signup-password"
+          type="password"
+          placeholder="Create password"
+        />
         <Button type="submit">Create Account</Button>
       </form>
     </section>

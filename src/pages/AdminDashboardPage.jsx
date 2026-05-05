@@ -9,9 +9,21 @@ function AdminDashboardPage() {
       </header>
 
       <div className="grid three">
-        <Card title="Users" subtitle="Basic section for user management" cta="Open" />
-        <Card title="Vehicles" subtitle="Basic section for vehicle approvals" cta="Open" />
-        <Card title="Bookings" subtitle="Basic section for booking monitoring" cta="Open" />
+        <Card
+          title="Users"
+          subtitle="Basic section for user management"
+          cta="Open"
+        />
+        <Card
+          title="Vehicles"
+          subtitle="Basic section for vehicle approvals"
+          cta="Open"
+        />
+        <Card
+          title="Bookings"
+          subtitle="Basic section for booking monitoring"
+          cta="Open"
+        />
       </div>
     </section>
   );

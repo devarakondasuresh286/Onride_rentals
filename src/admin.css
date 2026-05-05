@@ -915,3 +915,151 @@ a {
     align-items: flex-start;
   }
 }
+
+.panel.table-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+}
+
+.table-head {
+  margin-bottom: 1rem;
+}
+
+.table-search {
+  max-width: 280px;
+}
+
+.booking-table-wrap {
+  overflow-x: auto;
+}
+
+.booking-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.booking-table th,
+.booking-table td {
+  text-align: left;
+  padding: 0.9rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.notifications-head {
+  margin-top: 2.2rem;
+}
+
+.notification-filters {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.6rem;
+}
+
+.notifications-list {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.notification-item {
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1rem;
+}
+
+.notification-item.unread {
+  background: #edf5f5;
+}
+
+.notification-item h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.notification-item p,
+.notification-item small {
+  color: var(--muted);
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.icon-btn {
+  border: none;
+  background: transparent;
+  color: #98a7b7;
+  cursor: pointer;
+}
+
+
+.auth-wrapper {
+  min-height: calc(100vh - 80px);
+  display: grid;
+  place-items: center;
+  background: #dfe4e8;
+  padding: 2rem 1rem;
+}
+
+.auth-card {
+  width: min(520px, 100%);
+  padding: 1.5rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.auth-card p {
+  color: var(--muted);
+}
+
+.name-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.name-row div {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.role-row {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--muted);
+}
+
+.role-row label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.forgot-link,
+.auth-switch a {
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+.auth-switch {
+  text-align: center;
+}
+
+.table-head,
+  .page-heading,
+  .with-action,
+  .with-badge,
+  .notifications-head,
+  .section-head,
+  .notification-item,
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
