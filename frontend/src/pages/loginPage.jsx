@@ -28,7 +28,9 @@ function LoginPage() {
       const result = await login(formData.email, formData.password);
       
       if (result.success) {
-        navigate("/dashboard");
+        if (result.user?.role === "admin") navigate("/admin");
+        else if (result.user?.role === "renter") navigate("/renter");
+        else navigate("/dashboard");
       } else {
         setError(result.error || "Login failed");
       }

@@ -1,13 +1,26 @@
 import { BellRing } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { notifications } from "../data/mockData";
+import { notificationsApi } from "../services/api";
 
 function NotificationsPage() {
   const [activeFilter, setActiveFilter] = useState("All");
-  const [items, setItems] = useState(notifications);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const unreadCount = useMemo(() => items.filter((item) => item.unread).length, [items]);
+  useEffect(() => {
+    notificationsApi.listNotifications()
+      .then(data => {
+        setItems(data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error("Failed to fetch notifications:", error);
+        setLoading(false);
+      });
+  }, []);
+
+  const unreadCount = useMemo(() => items.filter((item) => !item.is_read).length, [items]);
 
   const visibleItems = useMemo(() => {
     if (activeFilter === "All") {
@@ -17,8 +30,13 @@ function NotificationsPage() {
     return items.filter((item) => item.type === activeFilter);
   }, [activeFilter, items]);
 
-  const markAllRead = () => {
-    setItems((prev) => prev.map((item) => ({ ...item, unread: false })));
+  const markAllRead = async () => {
+    try {
+      await notificationsApi.markAllAsRead();
+      setItems((prev) => prev.map((item) => ({ ...item, is_read: true })));
+    } catch (error) {
+      console.error("Failed to mark all as read:", error);
+    }
   };
 
   const deleteNotification = (id) => {
@@ -51,19 +69,23 @@ function NotificationsPage() {
       </div>
 
       <div className="notice-list">
-        {visibleItems.map((item) => (
-          <article key={item.id} className={item.unread ? "notice unread" : "notice"}>
-            <BellRing size={18} />
-            <div>
-              <h3>{item.title}</h3>
-              <p>{item.message}</p>
-              <small>{item.time}</small>
-            </div>
-            <button className="icon-btn" type="button" onClick={() => deleteNotification(item.id)}>
-              ×
-            </button>
-          </article>
-        ))}
+        {loading ? (
+          <p>Loading notifications...</p>
+        ) : (
+          visibleItems.map((item) => (
+            <article key={item.id} className={!item.is_read ? "notice unread" : "notice"}>
+              <BellRing size={18} />
+              <div>
+                <h3>{item.title}</h3>
+                <p>{item.message}</p>
+                <small>{new Date(item.created_at).toLocaleString()}</small>
+              </div>
+              <button className="icon-btn" type="button" onClick={() => deleteNotification(item.id)}>
+                ×
+              </button>
+            </article>
+          ))
+        )}
       </div>
     </section>
   );

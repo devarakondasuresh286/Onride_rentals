@@ -13,23 +13,23 @@ import SignupPage from "./pages/SignupPage";
 import VehicleDetailsPage from "./pages/VehicleDetailsPage";
 
 function App() {
-    return (
-        <Routes>
-            <Route element={<MainLayout />}>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/browse" element={<BrowsePage />} />
-                <Route path="/dashboard" element={<CustomerDashboardPage />} />
-                <Route path="/renter" element={<RenterDashboardPage />} />
-                <Route path="/renter/add" element={<RenterAddVehiclePage />} />
-                <Route path="/notifications" element={<NotificationsPage />} />
-                <Route path="/admin" element={<AdminPage />} />
-                <Route path="/vehicle/:id" element={<VehicleDetailsPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/signup" element={<SignupPage />} />
-            </Route>
-            <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-    );
+  return (
+    <Routes>
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/browse" element={<BrowsePage />} />
+        <Route path="/dashboard" element={<CustomerDashboardPage />} />
+        <Route path="/renter" element={<RenterDashboardPage />} />
+        <Route path="/renter/add" element={<RenterAddVehiclePage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/vehicle/:id" element={<VehicleDetailsPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
 }
 
 export default App;
