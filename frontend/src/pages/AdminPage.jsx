@@ -1,6 +1,6 @@
 import Card from "../components/Card";
 
-function AdminDashboardPage() {
+function AdminPage() {
   return (
     <section className="stack-lg">
       <header>
@@ -29,4 +29,4 @@ function AdminDashboardPage() {
   );
 }
 
-export default AdminDashboardPage;
+export default AdminPage;

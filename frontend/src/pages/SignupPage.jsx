@@ -35,7 +35,10 @@ function SignupPage() {
           </button>
         </form>
         <p className="compact-top">
-          Already have an account? <button className="text-link" onClick={() => navigate("/login")}>Log in</button>
+          Already have an account?{" "}
+          <button className="text-link" onClick={() => navigate("/login")}>
+            Log in
+          </button>
         </p>
       </div>
     </section>
