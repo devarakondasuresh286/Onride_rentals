@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.security import get_current_user
 from app.models.notification import Notification
 from app.schemas.common import NotificationOut
 from pydantic import BaseModel
@@ -17,10 +18,10 @@ class NotificationCreate(BaseModel):
 
 
 @router.get("", response_model=list[dict])
-def list_notifications(user_id: int = 1, db: Session = Depends(get_db)) -> list[dict]:
+def list_notifications(current_user = Depends(get_current_user), db: Session = Depends(get_db)) -> list[dict]:
     """List all notifications for a user"""
     notifications = db.query(Notification).filter(
-        Notification.user_id == user_id
+        Notification.user_id == current_user.id
     ).order_by(Notification.created_at.desc()).all()
     
     return [
@@ -39,12 +40,12 @@ def list_notifications(user_id: int = 1, db: Session = Depends(get_db)) -> list[
 @router.get("/{notification_id}", response_model=dict)
 def get_notification(
     notification_id: int,
-    user_id: int = 1,
+    current_user = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
     """Get a specific notification"""
     notification = db.query(Notification).filter(
-        (Notification.id == notification_id) & (Notification.user_id == user_id)
+        (Notification.id == notification_id) & (Notification.user_id == current_user.id)
     ).first()
     
     if not notification:
@@ -65,12 +66,12 @@ def get_notification(
 @router.post("", response_model=dict)
 def create_notification(
     payload: NotificationCreate,
-    user_id: int = 1,
+    current_user = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
     """Create a new notification"""
     notification = Notification(
-        user_id=user_id,
+        user_id=current_user.id,
         title=payload.title,
         message=payload.message,
         type=payload.type,
@@ -89,12 +90,12 @@ def create_notification(
 @router.put("/{notification_id}", response_model=dict)
 def mark_as_read(
     notification_id: int,
-    user_id: int = 1,
+    current_user = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
     """Mark a notification as read"""
     notification = db.query(Notification).filter(
-        (Notification.id == notification_id) & (Notification.user_id == user_id)
+        (Notification.id == notification_id) & (Notification.user_id == current_user.id)
     ).first()
     
     if not notification:
@@ -114,11 +115,11 @@ def mark_as_read(
 
 @router.put("/mark-all-as-read", response_model=dict)
 def mark_all_as_read(
-    user_id: int = 1,
+    current_user = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
     """Mark all notifications as read"""
-    db.query(Notification).filter(Notification.user_id == user_id).update(
+    db.query(Notification).filter(Notification.user_id == current_user.id).update(
         {"is_read": True}
     )
     db.commit()

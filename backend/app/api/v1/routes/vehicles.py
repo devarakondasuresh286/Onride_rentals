@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.security import get_current_user
 from app.models.vehicle import Vehicle
 from app.models.favorite import Favorite
 from app.schemas.common import VehicleOut, VehicleCreate, FavoriteCreate
@@ -46,6 +47,37 @@ def list_vehicles(db: Session = Depends(get_db)) -> list[dict]:
     return result
 
 
+@router.get("/favorites", response_model=list[dict])
+def get_favorites(
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    """Get user's favorite vehicles"""
+    favorites = db.query(Vehicle).join(
+        Favorite, Vehicle.id == Favorite.vehicle_id
+    ).filter(Favorite.user_id == current_user.id).all()
+
+    result = []
+    for vehicle in favorites:
+        vehicle_dict = {
+            "id": vehicle.id,
+            "title": vehicle.title,
+            "category": vehicle.category,
+            "city": vehicle.city,
+            "state": vehicle.state,
+            "seats": vehicle.seats,
+            "transmission": vehicle.transmission,
+            "fuel_type": vehicle.fuel_type,
+            "price_per_day": vehicle.price_per_day,
+            "image_url": vehicle.image_url,
+            "rating": MOCK_RATINGS.get(vehicle.id, {}).get("rating", 4.5),
+            "reviews": MOCK_RATINGS.get(vehicle.id, {}).get("reviews", 50),
+        }
+        result.append(vehicle_dict)
+
+    return result
+
+
 @router.get("/{vehicle_id}", response_model=dict)
 def get_vehicle(vehicle_id: int, db: Session = Depends(get_db)) -> dict:
     """Get a specific vehicle by ID"""
@@ -76,12 +108,12 @@ def get_vehicle(vehicle_id: int, db: Session = Depends(get_db)) -> dict:
 @router.post("", response_model=dict)
 def create_vehicle(
     payload: VehicleCreate,
-    user_id: int = 1,
+    current_user = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
     """Create a new vehicle listing"""
     vehicle = Vehicle(
-        owner_id=user_id,
+        owner_id=current_user.id,
         title=payload.title,
         category=payload.category,
         city=payload.city,
@@ -107,7 +139,7 @@ def create_vehicle(
 @router.post("/{vehicle_id}/favorite", response_model=dict)
 def add_favorite(
     vehicle_id: int,
-    user_id: int = 1,
+    current_user = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
     """Add vehicle to favorites"""
@@ -119,7 +151,7 @@ def add_favorite(
         )
     
     existing = db.query(Favorite).filter(
-        (Favorite.user_id == user_id) & (Favorite.vehicle_id == vehicle_id)
+        (Favorite.user_id == current_user.id) & (Favorite.vehicle_id == vehicle_id)
     ).first()
     if existing:
         raise HTTPException(
@@ -127,7 +159,7 @@ def add_favorite(
             detail="Vehicle already in favorites",
         )
     
-    favorite = Favorite(user_id=user_id, vehicle_id=vehicle_id)
+    favorite = Favorite(user_id=current_user.id, vehicle_id=vehicle_id)
     db.add(favorite)
     db.commit()
     
@@ -137,12 +169,12 @@ def add_favorite(
 @router.delete("/{vehicle_id}/favorite", response_model=dict)
 def remove_favorite(
     vehicle_id: int,
-    user_id: int = 1,
+    current_user = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
     """Remove vehicle from favorites"""
     favorite = db.query(Favorite).filter(
-        (Favorite.user_id == user_id) & (Favorite.vehicle_id == vehicle_id)
+        (Favorite.user_id == current_user.id) & (Favorite.vehicle_id == vehicle_id)
     ).first()
     
     if not favorite:
@@ -157,32 +189,3 @@ def remove_favorite(
     return {"message": "Vehicle removed from favorites"}
 
 
-@router.get("/favorites", response_model=list[dict])
-def get_favorites(
-    user_id: int = 1,
-    db: Session = Depends(get_db),
-) -> list[dict]:
-    """Get user's favorite vehicles"""
-    favorites = db.query(Vehicle).join(
-        Favorite, Vehicle.id == Favorite.vehicle_id
-    ).filter(Favorite.user_id == user_id).all()
-    
-    result = []
-    for vehicle in favorites:
-        vehicle_dict = {
-            "id": vehicle.id,
-            "title": vehicle.title,
-            "category": vehicle.category,
-            "city": vehicle.city,
-            "state": vehicle.state,
-            "seats": vehicle.seats,
-            "transmission": vehicle.transmission,
-            "fuel_type": vehicle.fuel_type,
-            "price_per_day": vehicle.price_per_day,
-            "image_url": vehicle.image_url,
-            "rating": MOCK_RATINGS.get(vehicle.id, {}).get("rating", 4.5),
-            "reviews": MOCK_RATINGS.get(vehicle.id, {}).get("reviews", 50),
-        }
-        result.append(vehicle_dict)
-    
-    return result

@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.security import get_current_user
 from app.models.booking import Booking
 from app.models.vehicle import Vehicle
 from app.schemas.common import BookingCreate, BookingOut
@@ -14,9 +15,9 @@ router = APIRouter()
 
 
 @router.get("", response_model=list[dict])
-def list_bookings(user_id: int = 1, db: Session = Depends(get_db)) -> list[dict]:
+def list_bookings(current_user = Depends(get_current_user), db: Session = Depends(get_db)) -> list[dict]:
     """List all bookings for a user"""
-    bookings = db.query(Booking).filter(Booking.user_id == user_id).all()
+    bookings = db.query(Booking).filter(Booking.user_id == current_user.id).all()
     
     result = []
     for booking in bookings:
@@ -40,7 +41,7 @@ def list_bookings(user_id: int = 1, db: Session = Depends(get_db)) -> list[dict]
 @router.post("", response_model=dict)
 def create_booking(
     payload: BookingCreate,
-    user_id: int = 1,  # In production, get from auth token
+    current_user = Depends(get_current_user),  # In production, get from auth token
     db: Session = Depends(get_db),
 ) -> dict:
     """Create a new booking"""
@@ -74,7 +75,7 @@ def create_booking(
     
     # Create booking
     booking = Booking(
-        user_id=user_id,
+        user_id=current_user.id,
         vehicle_id=payload.vehicle_id,
         start_date=payload.start_date,
         end_date=payload.end_date,
@@ -97,12 +98,12 @@ def create_booking(
 @router.get("/{booking_id}", response_model=dict)
 def get_booking(
     booking_id: int,
-    user_id: int = 1,  # In production, get from auth token
+    current_user = Depends(get_current_user),  # In production, get from auth token
     db: Session = Depends(get_db),
 ) -> dict:
     """Get a specific booking"""
     booking = db.query(Booking).filter(
-        (Booking.id == booking_id) & (Booking.user_id == user_id)
+        (Booking.id == booking_id) & (Booking.user_id == current_user.id)
     ).first()
     
     if not booking:
@@ -129,12 +130,12 @@ def get_booking(
 def update_booking_status(
     booking_id: int,
     status: str,
-    user_id: int = 1,  # In production, get from auth token
+    current_user = Depends(get_current_user),  # In production, get from auth token
     db: Session = Depends(get_db),
 ) -> dict:
     """Update booking status (cancel, complete, etc)"""
     booking = db.query(Booking).filter(
-        (Booking.id == booking_id) & (Booking.user_id == user_id)
+        (Booking.id == booking_id) & (Booking.user_id == current_user.id)
     ).first()
     
     if not booking:
@@ -162,12 +163,12 @@ def update_booking_status(
 @router.delete("/{booking_id}", response_model=dict)
 def cancel_booking(
     booking_id: int,
-    user_id: int = 1,  # In production, get from auth token
+    current_user = Depends(get_current_user),  # In production, get from auth token
     db: Session = Depends(get_db),
 ) -> dict:
     """Cancel a booking"""
     booking = db.query(Booking).filter(
-        (Booking.id == booking_id) & (Booking.user_id == user_id)
+        (Booking.id == booking_id) & (Booking.user_id == current_user.id)
     ).first()
     
     if not booking:
