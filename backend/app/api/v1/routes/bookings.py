@@ -33,8 +33,40 @@ def list_bookings(current_user = Depends(get_current_user), db: Session = Depend
                 "total_price": booking.total_price,
                 "status": booking.status,
                 "image_url": vehicle.image_url,
+                "payment_status": booking.payment_status,
             })
     
+    return result
+
+
+@router.get("/renter", response_model=list[dict])
+def list_renter_bookings(
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> list[dict]:
+    """List all booking requests for vehicles owned by the renter"""
+    bookings = (
+        db.query(Booking)
+        .join(Vehicle, Booking.vehicle_id == Vehicle.id)
+        .filter(Vehicle.owner_id == current_user.id)
+        .all()
+    )
+    
+    result = []
+    for booking in bookings:
+        vehicle = db.query(Vehicle).filter(Vehicle.id == booking.vehicle_id).first()
+        result.append({
+            "id": booking.id,
+            "vehicle_title": vehicle.title if vehicle else "Unknown",
+            "city": vehicle.city if vehicle else "Unknown",
+            "state": vehicle.state if vehicle else "Unknown",
+            "start_date": booking.start_date,
+            "end_date": booking.end_date,
+            "total_price": booking.total_price,
+            "status": booking.status,
+            "image_url": vehicle.image_url if vehicle else "",
+            "payment_status": booking.payment_status,
+        })
     return result
 
 
@@ -123,6 +155,7 @@ def get_booking(
         "end_date": booking.end_date,
         "total_price": booking.total_price,
         "status": booking.status,
+        "payment_status": booking.payment_status,
     }
 
 

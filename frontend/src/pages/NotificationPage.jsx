@@ -39,8 +39,24 @@ function NotificationsPage() {
     }
   };
 
-  const deleteNotification = (id) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
+  const deleteNotification = async (id) => {
+    try {
+      await notificationsApi.deleteNotification(id);
+      setItems((prev) => prev.filter((item) => item.id !== id));
+    } catch (error) {
+      console.error("Failed to delete notification:", error);
+    }
+  };
+
+  const markAsRead = async (id) => {
+    try {
+      await notificationsApi.markAsRead(id);
+      setItems((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, is_read: true } : item))
+      );
+    } catch (error) {
+      console.error("Failed to mark notification as read:", error);
+    }
   };
 
   return (
@@ -73,14 +89,26 @@ function NotificationsPage() {
           <p>Loading notifications...</p>
         ) : (
           visibleItems.map((item) => (
-            <article key={item.id} className={!item.is_read ? "notice unread" : "notice"}>
+            <article 
+              key={item.id} 
+              className={!item.is_read ? "notice unread" : "notice"}
+              onClick={() => !item.is_read && markAsRead(item.id)}
+              style={{ cursor: !item.is_read ? "pointer" : "default" }}
+            >
               <BellRing size={18} />
               <div>
                 <h3>{item.title}</h3>
                 <p>{item.message}</p>
                 <small>{new Date(item.created_at).toLocaleString()}</small>
               </div>
-              <button className="icon-btn" type="button" onClick={() => deleteNotification(item.id)}>
+              <button 
+                className="icon-btn" 
+                type="button" 
+                onClick={(e) => {
+                  e.stopPropagation(); // prevent triggering markAsRead
+                  deleteNotification(item.id);
+                }}
+              >
                 ×
               </button>
             </article>

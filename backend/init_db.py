@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import hashlib
+import bcrypt
 
 from app.core.config import settings
 from app.models.base import Base
@@ -14,15 +14,16 @@ from app.models.favorite import Favorite
 from datetime import date, datetime
 
 
-def simple_hash(password: str) -> str:
-    """Simple hash for demo purposes (NOT for production)"""
-    return hashlib.sha256(password.encode()).hexdigest()
+def get_password_hash(password: str) -> str:
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
 
 def init_db():
     """Initialize database with tables and sample data"""
     # Create engine with appropriate settings
-    if settings.DATABASE_TYPE == "sqlite":
+    is_sqlite = settings.DATABASE_URL.startswith("sqlite")
+    if is_sqlite:
         engine = create_engine(
             settings.DATABASE_URL,
             connect_args={"check_same_thread": False}
@@ -44,21 +45,21 @@ def init_db():
             first_name="John",
             last_name="Doe",
             email="john@example.com",
-            password_hash=simple_hash("password123"),
+            password_hash=get_password_hash("password123"),
             role="customer",
         )
         user2 = User(
             first_name="Jane",
             last_name="Smith",
             email="jane@example.com",
-            password_hash=simple_hash("password123"),
+            password_hash=get_password_hash("password123"),
             role="renter",
         )
         user3 = User(
             first_name="Admin",
             last_name="User",
             email="admin@example.com",
-            password_hash=simple_hash("admin123"),
+            password_hash=get_password_hash("admin123"),
             role="admin",
         )
         

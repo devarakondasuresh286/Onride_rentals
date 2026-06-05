@@ -15,11 +15,11 @@ function RenterDashboardPage() {
     const fetchData = async () => {
       try {
         const [vehiclesData, bookingsData] = await Promise.all([
-          vehiclesApi.listVehicles(),
-          bookingsApi.listBookings()
+          vehiclesApi.listMyVehicles(),
+          bookingsApi.listRenterBookings()
         ]);
-        setVehicles(vehiclesData);
-        setBookings(bookingsData);
+        setVehicles(vehiclesData || []);
+        setBookings(bookingsData || []);
       } catch (error) {
         console.error("Failed to fetch data:", error);
       } finally {

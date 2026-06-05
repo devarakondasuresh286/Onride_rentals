@@ -125,3 +125,26 @@ def mark_all_as_read(
     db.commit()
     
     return {"message": "All notifications marked as read"}
+
+
+@router.delete("/{notification_id}", response_model=dict)
+def delete_notification(
+    notification_id: int,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Delete a notification"""
+    notification = db.query(Notification).filter(
+        (Notification.id == notification_id) & (Notification.user_id == current_user.id)
+    ).first()
+    
+    if not notification:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Notification not found",
+        )
+    
+    db.delete(notification)
+    db.commit()
+    
+    return {"message": "Notification deleted successfully"}

@@ -47,6 +47,36 @@ def list_vehicles(db: Session = Depends(get_db)) -> list[dict]:
     return result
 
 
+@router.get("/my", response_model=list[dict])
+def list_my_vehicles(
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    """List all vehicles owned by current user"""
+    vehicles = db.query(Vehicle).filter(Vehicle.owner_id == current_user.id).all()
+    
+    result = []
+    for vehicle in vehicles:
+        vehicle_dict = {
+            "id": vehicle.id,
+            "title": vehicle.title,
+            "category": vehicle.category,
+            "city": vehicle.city,
+            "state": vehicle.state,
+            "seats": vehicle.seats,
+            "transmission": vehicle.transmission,
+            "fuel_type": vehicle.fuel_type,
+            "price_per_day": vehicle.price_per_day,
+            "image_url": vehicle.image_url,
+            "rating": MOCK_RATINGS.get(vehicle.id, {}).get("rating", 4.5),
+            "reviews": MOCK_RATINGS.get(vehicle.id, {}).get("reviews", 50),
+            "status": vehicle.status,
+        }
+        result.append(vehicle_dict)
+    
+    return result
+
+
 @router.get("/favorites", response_model=list[dict])
 def get_favorites(
     current_user = Depends(get_current_user),
