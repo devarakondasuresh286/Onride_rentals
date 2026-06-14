@@ -1,7 +1,7 @@
 # router.py placeholder
 from fastapi import APIRouter
 
-from app.api.v1.routes import admin, auth, bookings, notifications, payments, reviews, vehicles
+from app.api.v1.routes import admin, auth, bookings, notifications, payments, reviews, vehicles, upload
 
 
 api_router = APIRouter()
@@ -12,3 +12,4 @@ api_router.include_router(payments.router, prefix="/payments", tags=["payments"]
 api_router.include_router(reviews.router, prefix="/reviews", tags=["reviews"])
 api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
 api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
+api_router.include_router(upload.router, prefix="/upload", tags=["upload"])

@@ -5,6 +5,7 @@ from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.vehicle import Vehicle
 from app.models.favorite import Favorite
+from app.models.user import User
 from app.schemas.common import VehicleOut, VehicleCreate, FavoriteCreate
 from sqlalchemy import func
 
@@ -106,6 +107,21 @@ def get_favorites(
         result.append(vehicle_dict)
 
     return result
+
+
+@router.get("/stats", response_model=dict)
+def get_vehicle_stats(db: Session = Depends(get_db)) -> dict:
+    """Get public vehicle and platform stats for home page"""
+    vehicles_count = db.query(Vehicle).count()
+    users_count = db.query(User).count()
+    cities_count = db.query(func.distinct(Vehicle.city)).count()
+    
+    return {
+        "vehicles": vehicles_count,
+        "users": users_count,
+        "cities": cities_count,
+        "rating": 4.8,
+    }
 
 
 @router.get("/{vehicle_id}", response_model=dict)

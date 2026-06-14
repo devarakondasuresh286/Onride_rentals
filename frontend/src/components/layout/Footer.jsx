@@ -47,10 +47,10 @@ function Footer() {
                             <Mail size={18} /> support@onride.com
                         </li>
                         <li>
-                            <Phone size={18} /> +1 (555) 123-4567
+                            <Phone size={18} /> +33 (555) 123-4567
                         </li>
                         <li>
-                            <MapPin size={18} /> San Francisco, CA
+                            <MapPin size={18} /> Paris, France
                         </li>
                     </ul>
                 </div>
