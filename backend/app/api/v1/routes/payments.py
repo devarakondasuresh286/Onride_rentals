@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.security import get_current_user
 from app.models.payment import Payment
 from app.models.booking import Booking
 from app.schemas.common import PaymentOut
@@ -21,11 +22,11 @@ class PaymentUpdate(BaseModel):
 
 
 @router.get("", response_model=list[dict])
-def list_payments(user_id: int = 1, db: Session = Depends(get_db)) -> list[dict]:
+def list_payments(current_user = Depends(get_current_user), db: Session = Depends(get_db)) -> list[dict]:
     """List all payments for a user"""
     payments = db.query(Payment).join(
         Booking, Payment.booking_id == Booking.id
-    ).filter(Booking.user_id == user_id).all()
+    ).filter(Booking.user_id == current_user.id).all()
     
     return [
         {
@@ -42,7 +43,7 @@ def list_payments(user_id: int = 1, db: Session = Depends(get_db)) -> list[dict]
 @router.get("/{payment_id}", response_model=dict)
 def get_payment(
     payment_id: int,
-    user_id: int = 1,
+    current_user = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
     """Get a specific payment"""
@@ -56,7 +57,7 @@ def get_payment(
     
     # Verify user owns this booking
     booking = db.query(Booking).filter(Booking.id == payment.booking_id).first()
-    if booking.user_id != user_id:
+    if booking.user_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Unauthorized",
@@ -74,7 +75,7 @@ def get_payment(
 @router.post("", response_model=dict)
 def create_payment(
     payload: PaymentCreate,
-    user_id: int = 1,
+    current_user = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
     """Create a new payment"""
@@ -86,7 +87,7 @@ def create_payment(
             detail="Booking not found",
         )
     
-    if booking.user_id != user_id:
+    if booking.user_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Unauthorized",
@@ -119,7 +120,7 @@ def create_payment(
 def update_payment(
     payment_id: int,
     payload: PaymentUpdate,
-    user_id: int = 1,
+    current_user = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
     """Update payment status"""
@@ -133,7 +134,7 @@ def update_payment(
     
     # Verify user authorization
     booking = db.query(Booking).filter(Booking.id == payment.booking_id).first()
-    if booking.user_id != user_id:
+    if booking.user_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Unauthorized",

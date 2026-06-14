@@ -1,10 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === "admin") navigate("/admin");
+      else if (user.role === "renter") navigate("/renter");
+      else navigate("/dashboard");
+    }
+  }, [isAuthenticated, user, navigate]);
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",

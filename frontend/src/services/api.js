@@ -57,6 +57,7 @@ export const vehicleApi = {
 export const vehiclesApi = {
   getPublicStats: () => api.get("/vehicles/stats"),
   listVehicles: () => api.get("/vehicles"),
+  listMyVehicles: () => api.get("/vehicles/my"),
   getVehicle: (id) => api.get(`/vehicles/${id}`),
   createVehicle: (data) => api.post("/vehicles", data),
   getFavorites: () => api.get("/vehicles/favorites"),
@@ -70,7 +71,7 @@ export const bookingApi = {
   getById: (id) => api.get(`/bookings/${id}`),
   create: (data) => api.post("/bookings", data),
   update: (id, data) => api.put(`/bookings/${id}`, data),
-  cancel: (id) => api.post(`/bookings/${id}/cancel`),
+  cancel: (id) => api.delete(`/bookings/${id}`),
   getMyBookings: () => api.get("/bookings/my"),
   getUpcoming: () => api.get("/bookings/upcoming"),
   getPast: () => api.get("/bookings/past"),
@@ -79,10 +80,11 @@ export const bookingApi = {
 // Bookings API (aliased for consistency)
 export const bookingsApi = {
   listBookings: () => api.get("/bookings"),
+  listRenterBookings: () => api.get("/bookings/renter"),
   getBooking: (id) => api.get(`/bookings/${id}`),
   createBooking: (data) => api.post("/bookings", data),
   updateBooking: (id, data) => api.put(`/bookings/${id}`, data),
-  cancelBooking: (id) => api.post(`/bookings/${id}/cancel`),
+  cancelBooking: (id) => api.delete(`/bookings/${id}`),
 };
 
 // Payments API
@@ -158,6 +160,19 @@ export const adminApi = {
   listAllBookings: () => api.get("/admin/bookings"),
   listAllReviews: () => api.get("/admin/reviews"),
   getRevenueStats: () => api.get("/admin/revenue-stats"),
+};
+
+// Upload API
+export const uploadApi = {
+  uploadImage: (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.post("/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
 };
 
 export default api;
