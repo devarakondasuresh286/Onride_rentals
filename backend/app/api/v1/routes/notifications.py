@@ -5,6 +5,7 @@ from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.notification import Notification
 from app.schemas.common import NotificationOut
+from app.services.email_service import send_notification_email
 from pydantic import BaseModel
 
 
@@ -80,10 +81,17 @@ def create_notification(
     db.add(notification)
     db.commit()
     db.refresh(notification)
+
+    email_sent = send_notification_email(
+        to_email=current_user.email,
+        subject=payload.title,
+        message=payload.message,
+    )
     
     return {
         "id": notification.id,
         "message": "Notification created successfully",
+        "email_sent": email_sent,
     }
 
 

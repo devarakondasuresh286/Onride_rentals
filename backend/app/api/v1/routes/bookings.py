@@ -1,4 +1,5 @@
 from datetime import date
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -6,12 +7,44 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.booking import Booking
+from app.models.notification import Notification
+from app.models.user import User
 from app.models.vehicle import Vehicle
 from app.schemas.common import BookingCreate, BookingOut
 from app.services.booking_service import calculate_total_price, has_booking_conflict
+from app.services.email_service import send_notification_email
 
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+
+
+def _notify_user(db: Session, user_id: int, title: str, message: str, notification_type: str) -> bool:
+    recipient = db.query(User).filter(User.id == user_id).first()
+    if not recipient:
+        return False
+
+    notification = Notification(
+        user_id=user_id,
+        title=title,
+        message=message,
+        type=notification_type,
+        is_read=False,
+    )
+    db.add(notification)
+    db.flush()
+
+    email_sent = False
+    if recipient.email:
+        email_sent = send_notification_email(recipient.email, title, message)
+
+    logger.info(
+        "Notification created for user_id=%s notification_id=%s email_sent=%s",
+        user_id,
+        notification.id,
+        email_sent,
+    )
+    return email_sent
 
 
 @router.get("", response_model=list[dict])
@@ -118,12 +151,49 @@ def create_booking(
     db.add(booking)
     db.commit()
     db.refresh(booking)
+
+    owner_message = (
+        f"A new booking request was created for {vehicle.title} from {payload.start_date} to {payload.end_date}."
+    )
+    customer_message = (
+        f"Your booking for {vehicle.title} from {payload.start_date} to {payload.end_date} was created successfully."
+    )
+
+    owner_email_sent = False
+    customer_email_sent = False
+
+    db.begin_nested()
+    try:
+        customer_email_sent = _notify_user(
+            db=db,
+            user_id=current_user.id,
+            title="Booking created successfully",
+            message=customer_message,
+            notification_type="booking",
+        )
+
+        if vehicle.owner_id != current_user.id:
+            owner_email_sent = _notify_user(
+                db=db,
+                user_id=vehicle.owner_id,
+                title="New booking request",
+                message=owner_message,
+                notification_type="booking",
+            )
+
+        db.commit()
+    except Exception:
+        db.rollback()
+        logger.exception("Failed to create booking notifications for booking_id=%s", booking.id)
     
     return {
         "id": booking.id,
         "message": "Booking created successfully",
         "total_price": total_price,
         "status": booking.status,
+        "notifications_created": True,
+        "customer_email_sent": customer_email_sent,
+        "owner_email_sent": owner_email_sent,
     }
 
 
